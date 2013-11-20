@@ -88,6 +88,7 @@ public class GameScreenAppState extends AbstractAppState {
         guiNode.attachChild(hudText);
 
         createFloor();
+        createAuthorizeZone();
         createPath();
 
         createPlayerBase(new Vector3f(0, 0, -20));
@@ -129,18 +130,23 @@ public class GameScreenAppState extends AbstractAppState {
             hudText.setText(score + "      GO! GO! GO!");
         }
 
-//        CollisionResults results = new CollisionResults();
-//        Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
-//        Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
-//        direction.subtractLocal(origin).normalizeLocal();
-//        Ray ray = new Ray(origin, direction);
-//
-//        this.rootNode.collideWith(ray, results);
-//
-//        if (results.size() > 0) {
-//            CollisionResult closest = results.getClosestCollision();
-//            logger.log(Level.WARNING, closest.getGeometry().getName());
-//        }
+        CollisionResults results = new CollisionResults();
+        Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
+        Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
+        direction.subtractLocal(origin).normalizeLocal();
+        Ray ray = new Ray(origin, direction);
+
+        this.rootNode.collideWith(ray, results);
+
+        if (results.size() > 0) {
+            CollisionResult closest = results.getClosestCollision();
+
+            if (closest.getGeometry().getName().equals("authorize")) {
+                Material boxMat = new Material(this.app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+                boxMat.setColor("Color", ColorRGBA.Blue);
+                closest.getGeometry().setMaterial(boxMat);
+            }
+        }
     }
 
     @Override
@@ -267,5 +273,19 @@ public class GameScreenAppState extends AbstractAppState {
 
     public AssetManager getAssetManager() {
         return this.assetManager;
+    }
+
+    private void createAuthorizeZone() {
+        Box boxMesh = new Box(2f, 0.1f, 10f);
+        Geometry boxFloor = new Geometry("authorize", boxMesh);
+        Material boxMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        boxMat.setColor("Color", ColorRGBA.White);
+        boxFloor.setMaterial(boxMat);
+        boxFloor.setLocalTranslation(-6f, 0, 0);
+        Geometry clone = boxFloor.clone();
+        clone.setLocalTranslation(6f, 0, 0);
+        
+        this.rootNode.attachChild(boxFloor);
+        this.rootNode.attachChild(clone);
     }
 }
