@@ -2,7 +2,7 @@ package com.jm3.tdb.state;
 
 import com.jm3.tdb.control.CreepControl;
 import com.jm3.tdb.control.TowerControl;
-import com.jm3.tdb.domain.Circle3d;
+import com.jm3.tdb.domain.Factory;
 import static com.jm3.tdb.state.WorldScreenAppState.logger;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -15,14 +15,13 @@ import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.shape.Box;
-import com.jme3.scene.shape.Line;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -87,24 +86,42 @@ public class GameScreenAppState extends AbstractAppState {
         hudText.setText("");
         guiNode.attachChild(hudText);
 
-        createFloor();
-        createAuthorizeZone();
-        createPath();
+        Factory f = new Factory(this.assetManager);
 
-        createPlayerBase(new Vector3f(0, 0, -20));
+        final Geometry floor = f.createFloor(Vector3f.ZERO);
+        final Geometry authorizeZoneLeft = f.createAuthorizeZone(new Vector3f(-6f, 0, 0));
+        final Geometry authorizeZoneRight = f.createAuthorizeZone(new Vector3f(6f, 0, 0));
+        final Geometry path = f.createPath(new Vector3f(0, 0, -2.5f));
+        final Geometry playerBase = f.createPlayerBase(new Vector3f(0, 0, -20));
 
-        createTower(new Vector3f(5, 0, 0));
-        createTower(new Vector3f(-5, 0, 5));
+        this.playerBaseNode.attachChild(floor);
+        this.playerBaseNode.attachChild(authorizeZoneLeft);
+        this.playerBaseNode.attachChild(authorizeZoneRight);
+        this.playerBaseNode.attachChild(path);
+        this.playerBaseNode.attachChild(playerBase);
 
-        createCreep(new Vector3f(1, 0, 20));
-        createCreep(new Vector3f(3, 0, 25));
-        createCreep(new Vector3f(0, 0, 30));
-        createCreep(new Vector3f(2, 0, 16));
+        final Geometry towerOne = f.createTower(new Vector3f(5, 0, 0));
+        towerOne.addControl(new TowerControl(this));
+        final Geometry towerTwo = f.createTower(new Vector3f(-5, 0, 5));
+        towerTwo.addControl(new TowerControl(this));
 
-        this.rootNode.attachChild(playerBaseNode);
-        this.rootNode.attachChild(towerNode);
-        this.rootNode.attachChild(creepNode);
-        this.rootNode.attachChild(beamNode);
+        this.towerNode.attachChild(towerOne);
+        this.towerNode.attachChild(towerTwo);
+
+        for (int index = 0; index < 10; index++) {
+            final Geometry creep = f.createCreep(new Vector3f(randRange(-3, 3), 0, randRange(17, 30)));
+            creep.addControl(new CreepControl(this));
+            this.creepNode.attachChild(creep);
+        }
+
+        this.rootNode.attachChild(this.playerBaseNode);
+        this.rootNode.attachChild(this.towerNode);
+        this.rootNode.attachChild(this.creepNode);
+        this.rootNode.attachChild(this.beamNode);
+    }
+
+    private float randRange(float min, float max) {
+        return min + (float) Math.random() * (max - min);
     }
 
     @Override
@@ -157,92 +174,6 @@ public class GameScreenAppState extends AbstractAppState {
         super.cleanup();
     }
 
-    private void createFloor() {
-
-        Box boxMesh = new Box(30f, 0f, -30f);
-        Geometry boxFloor = new Geometry("floor", boxMesh);
-        Material boxMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        boxMat.setColor("Color", ColorRGBA.Orange);
-        boxFloor.setMaterial(boxMat);
-
-        this.rootNode.attachChild(boxFloor);
-
-        // Line
-        Line line = new Line(new Vector3f(-30f, 0f, 15), new Vector3f(30f, 0.1f, 15));
-        Geometry lineGeo = new Geometry("beam", line);
-        Material lineMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        lineMat.setColor("Color", ColorRGBA.Red);
-        lineGeo.setMaterial(lineMat);
-        this.rootNode.attachChild(lineGeo);
-    }
-
-    private void createPath() {
-
-        Box boxMesh = new Box(4f, 0.1f, 17.5f);
-        Geometry boxPath = new Geometry("path", boxMesh);
-        Material boxMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        boxMat.setColor("Color", ColorRGBA.Brown);
-        boxPath.setLocalTranslation(0, 0, -2.5f);
-        boxPath.setMaterial(boxMat);
-
-        this.rootNode.attachChild(boxPath);
-
-    }
-
-    private void createPlayerBase(Vector3f location) {
-
-        Box boxMesh = new Box(30f, 1f, 0f);
-        Geometry boxBase = new Geometry("base", boxMesh);
-        Material boxMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        boxMat.setColor("Color", ColorRGBA.Yellow);
-        boxBase.setMaterial(boxMat);
-        boxBase.setLocalTranslation(location.addLocal(0, boxMesh.getYExtent(), 0));
-        this.playerBaseNode.attachChild(boxBase);
-
-    }
-
-    private void createTower(Vector3f location) {
-
-        Box boxMesh = new Box(1f, 4f, 1f);
-        Geometry boxTower = new Geometry("tower", boxMesh);
-        Material boxMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        boxMat.setColor("Color", ColorRGBA.Green);
-        boxTower.setMaterial(boxMat);
-        boxTower.setLocalTranslation(location.addLocal(0, boxMesh.getYExtent(), 0));
-        boxTower.setUserData("index", 0);
-        boxTower.addControl(new TowerControl(this));
-
-        // Perimetre
-        Circle3d circle = new Circle3d(Vector3f.ZERO, 5f, 32);
-
-        Geometry geom = new Geometry("circle", circle);
-        geom.updateModelBound();
-
-        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.setColor("Color", ColorRGBA.Red);
-        geom.setMaterial(mat);
-        geom.setLocalTranslation(location.addLocal(0, -boxMesh.getYExtent() + 0.1f, 0));
-        rootNode.attachChild(geom);
-
-        this.towerNode.attachChild(boxTower);
-
-    }
-
-    private void createCreep(Vector3f location) {
-
-        Box boxMesh = new Box(1f, 1f, 1f);
-        Geometry boxCreep = new Geometry("creep", boxMesh);
-        Material boxMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        boxMat.setColor("Color", ColorRGBA.Black);
-        boxCreep.setMaterial(boxMat);
-        boxCreep.setLocalTranslation(location.addLocal(0, boxMesh.getYExtent(), 0));
-        boxCreep.setUserData("index", 0);
-        boxCreep.setUserData("health", Integer.valueOf(50));
-        boxCreep.addControl(new CreepControl(this));
-        this.creepNode.attachChild(boxCreep);
-
-    }
-
     public int getHealth() {
         return health;
     }
@@ -273,19 +204,5 @@ public class GameScreenAppState extends AbstractAppState {
 
     public AssetManager getAssetManager() {
         return this.assetManager;
-    }
-
-    private void createAuthorizeZone() {
-        Box boxMesh = new Box(2f, 0.1f, 10f);
-        Geometry boxFloor = new Geometry("authorize", boxMesh);
-        Material boxMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        boxMat.setColor("Color", ColorRGBA.White);
-        boxFloor.setMaterial(boxMat);
-        boxFloor.setLocalTranslation(-6f, 0, 0);
-        Geometry clone = boxFloor.clone();
-        clone.setLocalTranslation(6f, 0, 0);
-        
-        this.rootNode.attachChild(boxFloor);
-        this.rootNode.attachChild(clone);
     }
 }
