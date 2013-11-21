@@ -48,7 +48,7 @@ public class StartScreenAppState extends AbstractAppState {
     public void cleanup() {
         this.guiNode.detachAllChildren();
         this.worldScreenAppState.detachStartScreen();
-        
+
         super.cleanup();
     }
 }

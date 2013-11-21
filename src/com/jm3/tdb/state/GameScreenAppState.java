@@ -3,27 +3,20 @@ package com.jm3.tdb.state;
 import com.jm3.tdb.control.CreepControl;
 import com.jm3.tdb.control.TowerControl;
 import com.jm3.tdb.domain.Factory;
-import static com.jm3.tdb.state.WorldScreenAppState.logger;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
-import com.jme3.collision.CollisionResult;
-import com.jme3.collision.CollisionResults;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
-import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
-import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import java.util.List;
-import java.util.logging.Level;
 
 public class GameScreenAppState extends AbstractAppState {
 
@@ -50,8 +43,6 @@ public class GameScreenAppState extends AbstractAppState {
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
         super.initialize(stateManager, app);
-
-        logger.setLevel(Level.WARNING);
 
         this.app = (SimpleApplication) app;
         this.cam = this.app.getCamera();
@@ -147,23 +138,6 @@ public class GameScreenAppState extends AbstractAppState {
             hudText.setText(score + "      GO! GO! GO!");
         }
 
-        CollisionResults results = new CollisionResults();
-        Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
-        Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
-        direction.subtractLocal(origin).normalizeLocal();
-        Ray ray = new Ray(origin, direction);
-
-        this.rootNode.collideWith(ray, results);
-
-        if (results.size() > 0) {
-            CollisionResult closest = results.getClosestCollision();
-
-            if (closest.getGeometry().getName().equals("authorize")) {
-                Material boxMat = new Material(this.app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-                boxMat.setColor("Color", ColorRGBA.Blue);
-                closest.getGeometry().setMaterial(boxMat);
-            }
-        }
     }
 
     @Override
