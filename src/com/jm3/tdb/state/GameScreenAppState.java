@@ -43,12 +43,18 @@ public class GameScreenAppState extends AbstractAppState {
     private String score;
     private int health;
     private int budget;
+    private int level;
+    private int numberOfCreeps;
     private int timeBeforeAttack;
-    private int time;
+    private int numberOfTowerAvailable;
     private float timer_beam;
     private BitmapText hudText;
     private BitmapText timeText;
     private Boolean isPickable;
+    private long currTime;
+    private int updateTimeElapsed = 0;
+    private int systemTimeElapsed = 0;
+    private long prevUpdate = -1;
     private ActionListener actionListener = new ActionListener() {
         @Override
         public void onAction(String mapping, boolean keyDown, float tpf) {
@@ -87,7 +93,8 @@ public class GameScreenAppState extends AbstractAppState {
 
         this.budget = 0;
         this.health = 1;
-        this.timeBeforeAttack = 20;
+        this.numberOfTowerAvailable = 2;
+        this.timeBeforeAttack = 5;
 
         BitmapFont guiFont = this.assetManager.loadFont("Interface/Fonts/Default.fnt");
         BitmapText infoText = new BitmapText(guiFont, false);
@@ -131,15 +138,7 @@ public class GameScreenAppState extends AbstractAppState {
         this.playerBaseNode.attachChild(path);
         this.playerBaseNode.attachChild(playerBase);
 
-//        final Geometry towerOne = f.createTower(new Vector3f(5, 0, 0));
-//        towerOne.addControl(new TowerControl(this));
-//        final Geometry towerTwo = f.createTower(new Vector3f(-5, 0, 5));
-//        towerTwo.addControl(new TowerControl(this));
-
-//        this.towerNode.attachChild(towerOne);
-//        this.towerNode.attachChild(towerTwo);
-
-        for (int index = 0; index < 10; index++) {
+        for (int index = 0; index < getNumberOfCreeps(); index++) {
             final Geometry creep = f.createCreep(new Vector3f(randRange(-3, 3), 0, randRange(17, 30)));
             creep.addControl(new CreepControl(this));
             this.creepNode.attachChild(creep);
@@ -147,7 +146,6 @@ public class GameScreenAppState extends AbstractAppState {
 
         this.rootNode.attachChild(this.playerBaseNode);
         this.rootNode.attachChild(this.towerNode);
-//        this.rootNode.attachChild(this.creepNode);
         this.rootNode.attachChild(this.beamNode);
     }
 
@@ -157,7 +155,15 @@ public class GameScreenAppState extends AbstractAppState {
 
     @Override
     public void update(float tpf) {
-        time += tpf;
+        currTime = System.currentTimeMillis();
+
+        if (prevUpdate != -1) {
+            updateTimeElapsed += (int) (tpf * 1000f);
+            systemTimeElapsed += (currTime - prevUpdate);
+        }
+
+        prevUpdate = currTime;
+
         timer_beam += tpf;
 
         if (timer_beam > 0.1f) {
@@ -167,23 +173,35 @@ public class GameScreenAppState extends AbstractAppState {
             timer_beam = 0;
         }
 
-        if(time > 1f && this.timeBeforeAttack > 0) {
-            timeText.setText(String.format("Attack in %s s", this.timeBeforeAttack--));
-            time = 0;
-        }
-        
-        if (this.timeBeforeAttack < 0) {
+        timeText.setText(String.format("Attack in %s s", this.timeBeforeAttack - (int) systemTimeElapsed / 1000));
+
+        if (this.timeBeforeAttack - (int) systemTimeElapsed / 1000 < 0) {
             timeText.setText("Go Creeps!");
+            this.rootNode.attachChild(this.creepNode);
         }
 
-        score = String.format("Budget: %d, Health: %d, Creeps: %d [%d]", getBudget(), getHealth(), getCreeps().size(), (getCreeps().size() > 0) ? getCreeps().get(0).getControl(CreepControl.class).getHealth() : 0);
+        score = String.format("Level %s, Budget: %d, Health: %d, Creeps: %d", getLevel(), getBudget(), getHealth(), getCreeps().size());
 
         if (getHealth() <= 0) {
-            stopGame();
+            // TODO : Afficher un ecran perdu
+            hudText.setText(score + "  YOU LOOSE");
         } else if ((getCreeps().isEmpty()) && getHealth() > 0) {
-            hudText.setText(score + "      YOU WIN!");
+            addLevel();
+
+            this.rootNode.detachChild(this.creepNode);
+
+            this.timeBeforeAttack = 5;
+            this.prevUpdate = -1;
+            this.updateTimeElapsed = 0;
+            this.systemTimeElapsed = 0;
+
+            for (int index = 0; index < getNumberOfCreeps(); index++) {
+                final Geometry creep = f.createCreep(new Vector3f(randRange(-3, 3), 0, randRange(17, 30)));
+                creep.addControl(new CreepControl(this));
+                this.creepNode.attachChild(creep);
+            }
         } else {
-            hudText.setText(score + "      GO! GO! GO!");
+            hudText.setText(score);
         }
 
         CollisionResults results = new CollisionResults();
@@ -208,7 +226,7 @@ public class GameScreenAppState extends AbstractAppState {
         super.cleanup();
     }
 
-    public int getHealth() {
+    private int getHealth() {
         return health;
     }
 
@@ -216,7 +234,7 @@ public class GameScreenAppState extends AbstractAppState {
         this.health--;
     }
 
-    public int getBudget() {
+    private int getBudget() {
         return budget;
     }
 
@@ -228,7 +246,7 @@ public class GameScreenAppState extends AbstractAppState {
         return this.creepNode.getChildren();
     }
 
-    public List<Spatial> getTowers() {
+    private List<Spatial> getTowers() {
         return this.towerNode.getChildren();
     }
 
@@ -246,19 +264,39 @@ public class GameScreenAppState extends AbstractAppState {
     }
 
     private void addTower() {
-        CollisionResults results = new CollisionResults();
-        Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
-        Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
-        direction.subtractLocal(origin).normalizeLocal();
-        Ray ray = new Ray(origin, direction);
+        if (this.numberOfTowerAvailable != 0) {
+            CollisionResults results = new CollisionResults();
+            Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
+            Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
+            direction.subtractLocal(origin).normalizeLocal();
+            Ray ray = new Ray(origin, direction);
 
-        this.app.getRootNode().collideWith(ray, results);
+            this.app.getRootNode().collideWith(ray, results);
 
-        if (results.size() > 0) {
-            CollisionResult closest = results.getClosestCollision();
-            Geometry tower = f.createTower(closest.getContactPoint());
-            tower.addControl(new TowerControl(this));
-            this.towerNode.attachChild(tower);
+            if (results.size() > 0) {
+                CollisionResult closest = results.getClosestCollision();
+                Geometry tower = f.createTower(closest.getContactPoint());
+                tower.addControl(new TowerControl(this));
+                this.towerNode.attachChild(tower);
+                this.numberOfTowerAvailable--;
+            }
         }
+    }
+
+    private int getLevel() {
+        return level;
+    }
+
+    private void addLevel() {
+        this.level++;
+        addNumberOfCreeps();
+    }
+
+    private int getNumberOfCreeps() {
+        return numberOfCreeps;
+    }
+
+    private void addNumberOfCreeps() {
+        this.numberOfCreeps += 10;
     }
 }
