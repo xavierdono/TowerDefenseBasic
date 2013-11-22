@@ -256,7 +256,7 @@ public class GameScreenAppState extends AbstractAppState {
 
         if (results.size() > 0) {
             CollisionResult closest = results.getClosestCollision();
-            Geometry tower = f.createTower(closest.getGeometry().getLocalTranslation());
+            Geometry tower = f.createTower(closest.getContactPoint());
             tower.addControl(new TowerControl(this));
             this.towerNode.attachChild(tower);
         }
