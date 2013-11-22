@@ -1,6 +1,6 @@
 package com.jm3.tdb;
 
-import com.jm3.tdb.state.WorldScreenAppState;
+import com.jm3.tdb.state.StartScreenAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.Vector3f;
 import com.jme3.system.AppSettings;
@@ -34,7 +34,7 @@ public class Main extends SimpleApplication {
         cam.setLocation(new Vector3f(0f, 50f, 50f));
         cam.lookAt(new Vector3f(0, 0, 8f), Vector3f.UNIT_Y);
 
-        WorldScreenAppState worldScreenAppState = new WorldScreenAppState();
-        stateManager.attach(worldScreenAppState);
+        StartScreenAppState startScreenAppState = new StartScreenAppState();
+        stateManager.attach(startScreenAppState);
     }
 }
