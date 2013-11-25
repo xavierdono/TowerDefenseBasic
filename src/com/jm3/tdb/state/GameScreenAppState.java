@@ -180,7 +180,7 @@ public class GameScreenAppState extends AbstractAppState {
             this.rootNode.attachChild(this.creepNode);
         }
 
-        score = String.format("Level %s, Budget: %d, Health: %d, Creeps: %d", getLevel(), getBudget(), getHealth(), getCreeps().size());
+        score = String.format("Level %s, Budget: %d, Health: %d, Creeps: %d, Creeps health: %d", getLevel(), getBudget(), getHealth(), getCreeps().size(), getCreeps().isEmpty() ? 0 : getCreeps().get(0).getControl(CreepControl.class).getHealth());
 
         if (getHealth() <= 0) {
             // TODO : Afficher un ecran perdu
@@ -198,6 +198,7 @@ public class GameScreenAppState extends AbstractAppState {
             for (int index = 0; index < getNumberOfCreeps(); index++) {
                 final Geometry creep = f.createCreep(new Vector3f(randRange(-3, 3), 0, randRange(17, 30)));
                 creep.addControl(new CreepControl(this));
+
                 this.creepNode.attachChild(creep);
             }
         } else {

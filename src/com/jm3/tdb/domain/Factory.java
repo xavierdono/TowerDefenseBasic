@@ -58,7 +58,7 @@ public final class Factory {
 
     public Geometry createPlayerBase(Vector3f location) {
 
-        Box boxMesh = new Box(30f, 1f, 0f);
+        Box boxMesh = new Box(20f, 1f, 0f);
         Geometry boxBase = new Geometry("base", boxMesh);
         Material boxMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         boxMat.setColor("Color", ColorRGBA.Yellow);
@@ -84,7 +84,7 @@ public final class Factory {
 
     public Geometry createFloor(Vector3f location) {
 
-        Box boxMesh = new Box(30f, 0f, -30f);
+        Box boxMesh = new Box(20f, 0f, -30f);
         Geometry boxFloor = new Geometry("floor", boxMesh);
         Material boxMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         boxMat.setColor("Color", ColorRGBA.Orange);
@@ -94,7 +94,7 @@ public final class Factory {
     }
 
     public Geometry createLine(Vector3f location) {
-        Line line = new Line(new Vector3f(-30f, 0f, 15), new Vector3f(30f, 0.1f, 15));
+        Line line = new Line(new Vector3f(-20f, 0f, 15), new Vector3f(20f, 0.1f, 15));
         Geometry lineGeo = new Geometry("beam", line);
         Material lineMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         lineMat.setColor("Color", ColorRGBA.Red);
