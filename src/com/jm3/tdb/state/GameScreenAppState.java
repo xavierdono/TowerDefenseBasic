@@ -14,6 +14,7 @@ import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
@@ -30,6 +31,7 @@ public class GameScreenAppState extends AbstractAppState {
 
     private SimpleApplication app;
     private Camera cam;
+    private Node pickableNode;
     private Node rootNode;
     private Node guiNode;
     private Factory f;
@@ -48,10 +50,12 @@ public class GameScreenAppState extends AbstractAppState {
     private int healthOfCreeps;
     private int timeBeforeAttack;
     private int numberOfTowerAvailable;
+    private Geometry p;
     private float timer_beam;
     private BitmapText hudText;
     private BitmapText timeText;
     private Boolean isPickable;
+    private Boolean swapView = true;
     private long currTime;
     private int updateTimeElapsed = 0;
     private int systemTimeElapsed = 0;
@@ -63,6 +67,10 @@ public class GameScreenAppState extends AbstractAppState {
                 if (isPickable) {
                     addTower();
                 }
+            }
+
+            if (mapping.equals("move") && !keyDown) {
+                moveCamera();
             }
 
             if (mapping.equals("quit") && !keyDown) {
@@ -86,11 +94,13 @@ public class GameScreenAppState extends AbstractAppState {
         this.playerBaseNode = new Node();
         this.towerNode = new Node();
         this.creepNode = new Node();
+        this.pickableNode = new Node();
         this.beamNode = new Node();
 
         this.inputManager.addMapping("quit", new KeyTrigger(KeyInput.KEY_ESCAPE));
-        this.inputManager.addMapping("select", new MouseButtonTrigger(0));
-        this.inputManager.addListener(actionListener, "select", "quit");
+        this.inputManager.addMapping("select", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        this.inputManager.addMapping("move", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+        this.inputManager.addListener(actionListener, "select", "quit", "move");
 
         this.budget = 0;
         this.health = 1;
@@ -146,6 +156,9 @@ public class GameScreenAppState extends AbstractAppState {
             creep.addControl(new CreepControl(this));
             this.creepNode.attachChild(creep);
         }
+
+        p = f.createTower(new Vector3f(0, 0, 0));
+        this.pickableNode.attachChild(p);
 
         this.rootNode.attachChild(this.playerBaseNode);
         this.rootNode.attachChild(this.towerNode);
@@ -208,17 +221,30 @@ public class GameScreenAppState extends AbstractAppState {
             hudText.setText(score);
         }
 
-        CollisionResults results = new CollisionResults();
-        Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
-        Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
-        direction.subtractLocal(origin).normalizeLocal();
-        Ray ray = new Ray(origin, direction);
+        if (this.numberOfTowerAvailable != 0) {
+            CollisionResults results = new CollisionResults();
+            Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
+            Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
+            direction.subtractLocal(origin).normalizeLocal();
+            Ray ray = new Ray(origin, direction);
 
-        this.app.getRootNode().collideWith(ray, results);
+            this.app.getRootNode().collideWith(ray, results);
 
-        if (results.size() > 0) {
-            CollisionResult closest = results.getClosestCollision();
-            isPickable = (closest.getGeometry().getName().equals("authorize")) ? true : false;
+            if (results.size() > 0) {
+                CollisionResult closest = results.getClosestCollision();
+                if (closest.getGeometry().getName().equals("authorize")) {
+                    isPickable = true;
+
+                    p.setLocalTranslation(closest.getContactPoint().x, closest.getContactPoint().y + 4, closest.getContactPoint().z);
+                    this.rootNode.attachChild(this.pickableNode);
+
+                } else {
+                    isPickable = false;
+                    this.rootNode.detachChild(this.pickableNode);
+                }
+            } else {
+                this.rootNode.detachChild(this.pickableNode);
+            }
         }
     }
 
@@ -279,6 +305,7 @@ public class GameScreenAppState extends AbstractAppState {
                 tower.addControl(new TowerControl(this));
                 this.towerNode.attachChild(tower);
                 this.numberOfTowerAvailable--;
+                this.rootNode.detachChild(this.pickableNode);
             }
         }
     }
@@ -304,5 +331,20 @@ public class GameScreenAppState extends AbstractAppState {
 
     public int getHealthOfCreeps() {
         return healthOfCreeps;
+    }
+
+    private void moveCamera() {
+
+        if (swapView) {
+            // Vue de dessus
+            cam.setLocation(new Vector3f(-15f, 80f, 0f));
+            cam.lookAt(new Vector3f(-15f, 0f, 0f), Vector3f.UNIT_Y);
+        } else {
+            // View Normal
+            cam.setLocation(new Vector3f(15f, 50f, 50f));
+            cam.lookAt(new Vector3f(15f, 0f, 10f), Vector3f.UNIT_Y);
+        }
+
+        swapView = !swapView;
     }
 }

@@ -32,7 +32,7 @@ public class Main extends SimpleApplication {
         inputManager.setCursorVisible(true);
 
         cam.setLocation(new Vector3f(15f, 50f, 50f));
-        cam.lookAt(new Vector3f(15f, 0, 8f), Vector3f.UNIT_Y);
+        cam.lookAt(new Vector3f(15f, 0f, 10f), Vector3f.UNIT_Y);
 
         StartScreenAppState startScreenAppState = new StartScreenAppState();
         stateManager.attach(startScreenAppState);
