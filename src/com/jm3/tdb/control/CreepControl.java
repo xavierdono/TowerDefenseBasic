@@ -55,7 +55,7 @@ public class CreepControl extends AbstractControl {
         Vector3f loc = spatial.getLocalTranslation();
         return new Vector3f(loc.x, loc.y + 1, loc.z);
     }
-
+    
     public void decreaseCreepHealth() {
         spatial.setUserData("health", getHealth() - 1);
     }

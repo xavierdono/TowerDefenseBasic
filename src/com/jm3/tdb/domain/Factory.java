@@ -10,6 +10,7 @@ import com.jme3.scene.shape.Line;
 
 public final class Factory {
 
+    private int creepHealth;
     private AssetManager assetManager;
 
     public Factory(AssetManager as) {
@@ -51,9 +52,13 @@ public final class Factory {
         boxCreep.setMaterial(boxMat);
         boxCreep.setLocalTranslation(location.addLocal(0, boxMesh.getYExtent(), 0));
         boxCreep.setUserData("index", 0);
-        boxCreep.setUserData("health", Integer.valueOf(50));
+        boxCreep.setUserData("health", this.creepHealth);
 
         return boxCreep;
+    }
+
+    public void setCreepHealth(int creepHealth) {
+        this.creepHealth = creepHealth;
     }
 
     public Geometry createPlayerBase(Vector3f location) {

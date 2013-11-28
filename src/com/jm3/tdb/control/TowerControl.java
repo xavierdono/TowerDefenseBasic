@@ -37,10 +37,12 @@ public class TowerControl extends AbstractControl {
         }
 
         if (reachable.size() > 0) {
+            Line beam = null;
+            
             for (CreepControl creep : reachable) {
                 Vector3f hit = creep.getLoc();
                 
-                Line beam = new Line(
+                beam = new Line(
                         getTowerTop(),
                         new Vector3f(
                         hit.x + FastMath.rand.nextFloat() / 10f,

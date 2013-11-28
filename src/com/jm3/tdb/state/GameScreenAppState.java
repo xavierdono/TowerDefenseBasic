@@ -45,6 +45,7 @@ public class GameScreenAppState extends AbstractAppState {
     private int budget;
     private int level;
     private int numberOfCreeps;
+    private int healthOfCreeps;
     private int timeBeforeAttack;
     private int numberOfTowerAvailable;
     private float timer_beam;
@@ -95,6 +96,7 @@ public class GameScreenAppState extends AbstractAppState {
         this.health = 1;
         this.numberOfTowerAvailable = 2;
         this.timeBeforeAttack = 5;
+        this.healthOfCreeps = 40;
 
         BitmapFont guiFont = this.assetManager.loadFont("Interface/Fonts/Default.fnt");
         BitmapText infoText = new BitmapText(guiFont, false);
@@ -123,6 +125,7 @@ public class GameScreenAppState extends AbstractAppState {
         guiNode.attachChild(timeText);
 
         f = new Factory(this.assetManager);
+        f.setCreepHealth(getHealthOfCreeps());
 
         final Geometry floor = f.createFloor(Vector3f.ZERO);
         final Geometry authorizeZoneLeft = f.createAuthorizeZone(new Vector3f(-6f, 0, 0));
@@ -247,10 +250,6 @@ public class GameScreenAppState extends AbstractAppState {
         return this.creepNode.getChildren();
     }
 
-    private List<Spatial> getTowers() {
-        return this.towerNode.getChildren();
-    }
-
     public void addBeam(Geometry g) {
         this.beamNode.attachChild(g);
     }
@@ -291,13 +290,19 @@ public class GameScreenAppState extends AbstractAppState {
     private void addLevel() {
         this.level++;
         addNumberOfCreeps();
+        f.setCreepHealth(getHealthOfCreeps());
+    }
+
+    private void addNumberOfCreeps() {
+        this.numberOfCreeps += 10;
+        this.healthOfCreeps += 20;
     }
 
     private int getNumberOfCreeps() {
         return numberOfCreeps;
     }
 
-    private void addNumberOfCreeps() {
-        this.numberOfCreeps += 10;
+    public int getHealthOfCreeps() {
+        return healthOfCreeps;
     }
 }
