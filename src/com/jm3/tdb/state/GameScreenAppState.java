@@ -57,9 +57,9 @@ public class GameScreenAppState extends AbstractAppState {
     private Boolean isPickable;
     private Boolean swapView = true;
     private long currTime;
-    private int updateTimeElapsed = 0;
-    private int systemTimeElapsed = 0;
-    private long prevUpdate = -1;
+    private int updateTimeElapsed;
+    private int systemTimeElapsed;
+    private long prevUpdate;
     private ActionListener actionListener = new ActionListener() {
         @Override
         public void onAction(String mapping, boolean keyDown, float tpf) {
@@ -71,6 +71,10 @@ public class GameScreenAppState extends AbstractAppState {
 
             if (mapping.equals("move") && !keyDown) {
                 moveCamera();
+            }
+
+            if (mapping.equals("restart") && !keyDown) {
+                reStartGame();
             }
 
             if (mapping.equals("quit") && !keyDown) {
@@ -97,16 +101,24 @@ public class GameScreenAppState extends AbstractAppState {
         this.pickableNode = new Node();
         this.beamNode = new Node();
 
+        this.inputManager.clearMappings();
+        this.inputManager.removeListener(actionListener);
         this.inputManager.addMapping("quit", new KeyTrigger(KeyInput.KEY_ESCAPE));
+        this.inputManager.addMapping("restart", new KeyTrigger(KeyInput.KEY_R));
         this.inputManager.addMapping("select", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         this.inputManager.addMapping("move", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
-        this.inputManager.addListener(actionListener, "select", "quit", "move");
+        this.inputManager.addListener(actionListener, "select", "quit", "move", "restart");
 
         this.budget = 0;
         this.health = 1;
         this.numberOfTowerAvailable = 2;
-        this.timeBeforeAttack = 5;
+        this.timeBeforeAttack = 15;
         this.healthOfCreeps = 40;
+        this.numberOfCreeps = 10;
+        this.updateTimeElapsed = 0;
+        this.systemTimeElapsed = 0;
+        this.prevUpdate = -1;
+        this.level = 1;
 
         BitmapFont guiFont = this.assetManager.loadFont("Interface/Fonts/Default.fnt");
         BitmapText infoText = new BitmapText(guiFont, false);
@@ -287,6 +299,11 @@ public class GameScreenAppState extends AbstractAppState {
     private void stopGame() {
         stateManager.detach(this);
         this.app.stop();
+    }
+
+    private void reStartGame() {
+        this.stateManager.detach(this);
+        this.stateManager.attach(this);
     }
 
     private void addTower() {
