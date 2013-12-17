@@ -21,10 +21,12 @@ import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
+import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import de.lessvoid.nifty.Nifty;
 import java.util.List;
 
 public class GameScreenAppState extends AbstractAppState {
@@ -175,6 +177,15 @@ public class GameScreenAppState extends AbstractAppState {
         this.rootNode.attachChild(this.playerBaseNode);
         this.rootNode.attachChild(this.towerNode);
         this.rootNode.attachChild(this.beamNode);
+        
+        NiftyJmeDisplay niftyDisplay = new NiftyJmeDisplay(assetManager,
+                                                          inputManager,
+                                                          this.app.getAudioRenderer(),
+                                                          this.app.getGuiViewPort());
+        Nifty nifty = niftyDisplay.getNifty();
+        nifty.fromXml("Interface/gameUI.xml", "start");
+
+        this.app.getGuiViewPort().addProcessor(niftyDisplay); 
     }
 
     private float randRange(float min, float max) {
