@@ -11,7 +11,7 @@ public class Main extends SimpleApplication {
 
         AppSettings s = new AppSettings(true);
         s.setTitle("  Tower Defense Basic");
-        s.setResolution(1024, 768);
+        s.setResolution(1280, 720);
 
         Main app = new Main();
         app.setSettings(s);

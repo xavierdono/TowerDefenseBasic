@@ -27,9 +27,11 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.screen.Screen;
+import de.lessvoid.nifty.screen.ScreenController;
 import java.util.List;
 
-public class GameScreenAppState extends AbstractAppState {
+public class GameScreenAppState extends AbstractAppState implements ScreenController {
 
     private SimpleApplication app;
     private Camera cam;
@@ -178,8 +180,8 @@ public class GameScreenAppState extends AbstractAppState {
         this.rootNode.attachChild(this.towerNode);
         this.rootNode.attachChild(this.beamNode);
         
-        NiftyJmeDisplay niftyDisplay = new NiftyJmeDisplay(assetManager,
-                                                          inputManager,
+        NiftyJmeDisplay niftyDisplay = new NiftyJmeDisplay(this.assetManager,
+                                                          this.inputManager,
                                                           this.app.getAudioRenderer(),
                                                           this.app.getGuiViewPort());
         Nifty nifty = niftyDisplay.getNifty();
@@ -374,5 +376,14 @@ public class GameScreenAppState extends AbstractAppState {
         }
 
         swapView = !swapView;
+    }
+
+    public void bind(Nifty nifty, Screen screen) {
+    }
+
+    public void onStartScreen() {
+    }
+
+    public void onEndScreen() {
     }
 }
