@@ -313,7 +313,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         this.app.stop();
     }
     
-    private void reStartGame() {
+    public void reStartGame() {
         this.stateManager.detach(this);
         this.stateManager.attach(this);
     }
