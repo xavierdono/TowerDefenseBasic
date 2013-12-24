@@ -14,22 +14,26 @@
             
             <panel id="panelOption" height="100%" width="40%" align="left" valign="top" childLayout="vertical" visibleToMouse="true">
                 
-                <panel id="panelOptionInfo" height="20%" width="100%" align="center" valign="center" childLayout="horizontal" visibleToMouse="true" backgroundImage="/Interface/panel.png">
+                <panel id="panelOptionInfo" height="20%" width="100%" align="center" valign="center" childLayout="absolute-inside" visibleToMouse="true" backgroundImage="/Interface/panel.png">
                 
-                    <control name="label" text="Level : " align="center" valign="center" />
-                    <control name="label" text="1" align="center" valign="center" />
+                    <control name="label" text="Level :" align="center" valign="center" x="100" y="30" />
+                    <control id="lblLevel" name="label" text="1" align="center" valign="center" x="140" y="30" />
+                    
+                    <control name="label" text="Budget :" align="center" valign="center" x="100" y="50" />
+                    <control id="lblBudget" name="label" text="0" align="center" valign="center" x="160" y="50" />
+                    <image id = "imgBudget" filename= "Interface/budget.png" imageMode="normal" valign="center" x="165" y="45" visibleToMouse = "true" />
                     
                 </panel>
-            
+
                 <panel id="panelOptionTower" height="20%" width="100%" align="center" valign="bottom" childLayout="horizontal" visibleToMouse="true" backgroundImage="/Interface/panel.png">
                     <image id = "imgTower1" filename= "Interface/tower_lvl1.png" width="30%" height="50%" valign="center" visibleToMouse = "true">
-                        <interact onClick="reStartGame()"/>
+                        <interact onClick="towerClick1()"/>
                     </image>
                     <image id = "imgTower2" filename= "Interface/tower_lvl2.png" width="30%" height="50%" valign="center" visibleToMouse = "true">
-                        <interact onClick="reStartGame()"/>
+                        <interact onClick="towerClick2()"/>
                     </image>
                     <image id = "imgTower3" filename= "Interface/tower_lvl3.png" width="30%" height="50%" valign="center" visibleToMouse = "true">
-                        <interact onClick="reStartGame()"/>
+                        <interact onClick="towerClick3()"/>
                     </image>                    
                 </panel>
             
