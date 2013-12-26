@@ -28,10 +28,13 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.elements.Element;
+import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GameScreenAppState extends AbstractAppState implements ScreenController {
 
@@ -50,6 +53,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
     private Node beamNode;
     private Element niftylblBudget;
     private Element niftylblLevel;
+    private Nifty nifty;
     private String score;
     private int health;
     private int budget;
@@ -72,8 +76,10 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         @Override
         public void onAction(String mapping, boolean keyDown, float tpf) {
             if (mapping.equals("select") && !keyDown) {
-                if (isPickable) {
-                    addTower();
+                if (isPickable != null) {
+                    if (isPickable) {
+                        addTower();
+                    }
                 }
             }
 
@@ -189,12 +195,16 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                 this.inputManager,
                 this.app.getAudioRenderer(),
                 this.app.getGuiViewPort());
-        Nifty nifty = niftyDisplay.getNifty();
+        nifty = niftyDisplay.getNifty();
         nifty.fromXml("Interface/gameUI.xml", "start");
         niftylblBudget = nifty.getCurrentScreen().findElementByName("lblBudget");
         niftylblLevel = nifty.getCurrentScreen().findElementByName("lblLevel");
 
         this.app.getGuiViewPort().addProcessor(niftyDisplay);
+
+        Logger.getLogger("").setLevel(Level.SEVERE);
+        Logger.getLogger("de.lessvoid.nifty").setLevel(Level.SEVERE);
+        Logger.getLogger("NiftyInputEventHandlingLog").setLevel(Level.SEVERE);
     }
 
     private float randRange(float min, float max) {
@@ -388,24 +398,34 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         swapView = !swapView;
     }
 
+    @Override
     public void bind(Nifty nifty, Screen screen) {
+        this.nifty = nifty;
     }
 
+    @Override
     public void onStartScreen() {
     }
 
+    @Override
     public void onEndScreen() {
     }
 
-    public void towerClick1() {
-        System.out.println("towerClick1");
-    }
+    public void towerClick(String tower) {
 
-    public void towerClick2() {
-        System.out.println("towerClick2");
-    }
+        nifty.getCurrentScreen().findElementByName("imgTowerOption").getRenderer(ImageRenderer.class).setImage(nifty.getCurrentScreen().findElementByName("imgTower" + tower).getRenderer(ImageRenderer.class).getImage());
 
-    public void towerClick3() {
-        System.out.println("towerClick3");
+        switch (tower) {
+            case "1":
+                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Tir rapide");
+                break;
+            case "2":
+                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Ralenti la cible");
+                break;
+            case "3":
+                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Tir lent");
+                break;
+        }
+
     }
 }

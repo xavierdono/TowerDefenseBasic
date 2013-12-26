@@ -31,7 +31,7 @@ public class TowerControl extends AbstractControl {
         for (Spatial creep_geo : creeps) {
             CreepControl creep = creep_geo.getControl(CreepControl.class);
             if (creep.isAlive()
-                    && getTowerTop().distance(creep.getLoc()) <= FastMath.sqrt(74)) {
+                    && getTowerTop().distance(creep.getLoc()) <= FastMath.sqrt(89)) {
                 reachable.add(creep);
             }
         }
