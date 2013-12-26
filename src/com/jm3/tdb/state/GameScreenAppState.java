@@ -33,8 +33,6 @@ import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class GameScreenAppState extends AbstractAppState implements ScreenController {
 
@@ -202,9 +200,9 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
 
         this.app.getGuiViewPort().addProcessor(niftyDisplay);
 
-        Logger.getLogger("").setLevel(Level.SEVERE);
-        Logger.getLogger("de.lessvoid.nifty").setLevel(Level.SEVERE);
-        Logger.getLogger("NiftyInputEventHandlingLog").setLevel(Level.SEVERE);
+//        Logger.getLogger("").setLevel(Level.SEVERE);
+//        Logger.getLogger("de.lessvoid.nifty").setLevel(Level.SEVERE);
+//        Logger.getLogger("NiftyInputEventHandlingLog").setLevel(Level.SEVERE);
     }
 
     private float randRange(float min, float max) {
@@ -288,6 +286,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                     this.rootNode.detachChild(this.pickableNode);
                 }
             } else {
+                isPickable = false;
                 this.rootNode.detachChild(this.pickableNode);
             }
         }
@@ -352,6 +351,19 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
             if (results.size() > 0) {
                 CollisionResult closest = results.getClosestCollision();
                 Geometry tower = f.createTower(closest.getContactPoint());
+                
+//                switch (this.getTowerType()) {
+//                    case "1":
+//                        tower.getMaterial().setColor("Color", ColorRGBA.Red);
+//                        break;
+//                    case "2":
+//                        tower.getMaterial().setColor("Color", ColorRGBA.Blue);
+//                        break;
+//                    case "3":
+//                        tower.getMaterial().setColor("Color", ColorRGBA.Brown);
+//                        break;
+//                }
+
                 tower.addControl(new TowerControl(this));
                 this.towerNode.attachChild(tower);
                 this.numberOfTowerAvailable--;
