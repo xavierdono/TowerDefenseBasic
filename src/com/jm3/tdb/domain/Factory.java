@@ -25,7 +25,6 @@ public final class Factory {
         boxMat.setColor("Color", ColorRGBA.Green);
         boxTower.setMaterial(boxMat);
         boxTower.setLocalTranslation(location.addLocal(0, boxMesh.getYExtent(), 0));
-        boxTower.setUserData("index", 0);
 
 //        // Perimetre
 //        Circle3d circle = new Circle3d(Vector3f.ZERO, 5f, 32);
@@ -51,7 +50,6 @@ public final class Factory {
         boxMat.setColor("Color", ColorRGBA.Black);
         boxCreep.setMaterial(boxMat);
         boxCreep.setLocalTranslation(location.addLocal(0, boxMesh.getYExtent(), 0));
-        boxCreep.setUserData("index", 0);
         boxCreep.setUserData("health", this.creepHealth);
 
         return boxCreep;

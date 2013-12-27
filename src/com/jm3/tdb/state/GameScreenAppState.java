@@ -18,6 +18,7 @@ import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.light.AmbientLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
@@ -33,6 +34,8 @@ import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GameScreenAppState extends AbstractAppState implements ScreenController {
 
@@ -70,14 +73,20 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
     private int updateTimeElapsed;
     private int systemTimeElapsed;
     private long prevUpdate;
+    private String typeTower;
     private ActionListener actionListener = new ActionListener() {
         @Override
         public void onAction(String mapping, boolean keyDown, float tpf) {
             if (mapping.equals("select") && !keyDown) {
-                if (isPickable != null) {
-                    if (isPickable) {
-                        addTower();
+
+                if (numberOfTowerAvailable != 0) { // Pickable area
+                    if (isPickable != null) {
+                        if (isPickable) {
+                            addTower();
+                        }
                     }
+                } else { // Selectable area
+                    selectableTower();
                 }
             }
 
@@ -182,6 +191,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         }
 
         p = f.createTower(new Vector3f(0, 0, 0));
+        this.typeTower = "1";
 
         this.pickableNode.attachChild(p);
 
@@ -194,15 +204,16 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                 this.app.getAudioRenderer(),
                 this.app.getGuiViewPort());
         nifty = niftyDisplay.getNifty();
+        nifty.registerScreenController(this);
         nifty.fromXml("Interface/gameUI.xml", "start");
         niftylblBudget = nifty.getCurrentScreen().findElementByName("lblBudget");
         niftylblLevel = nifty.getCurrentScreen().findElementByName("lblLevel");
 
         this.app.getGuiViewPort().addProcessor(niftyDisplay);
 
-//        Logger.getLogger("").setLevel(Level.SEVERE);
-//        Logger.getLogger("de.lessvoid.nifty").setLevel(Level.SEVERE);
-//        Logger.getLogger("NiftyInputEventHandlingLog").setLevel(Level.SEVERE);
+        Logger.getLogger("").setLevel(Level.SEVERE);
+        Logger.getLogger("de.lessvoid.nifty").setLevel(Level.SEVERE);
+        Logger.getLogger("NiftyInputEventHandlingLog").setLevel(Level.SEVERE);
     }
 
     private float randRange(float min, float max) {
@@ -264,23 +275,22 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
             hudText.setText(score);
         }
 
+        CollisionResults results = new CollisionResults();
+        Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
+        Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
+        direction.subtractLocal(origin).normalizeLocal();
+        Ray ray = new Ray(origin, direction);
+
+        this.app.getRootNode().collideWith(ray, results);
+
         if (this.numberOfTowerAvailable != 0) {
-            CollisionResults results = new CollisionResults();
-            Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
-            Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
-            direction.subtractLocal(origin).normalizeLocal();
-            Ray ray = new Ray(origin, direction);
-
-            this.app.getRootNode().collideWith(ray, results);
-
             if (results.size() > 0) {
                 CollisionResult closest = results.getClosestCollision();
+
                 if (closest.getGeometry().getName().equals("authorize")) {
                     isPickable = true;
-
                     p.setLocalTranslation(closest.getContactPoint().x, closest.getContactPoint().y + 4, closest.getContactPoint().z);
                     this.rootNode.attachChild(this.pickableNode);
-
                 } else {
                     isPickable = false;
                     this.rootNode.detachChild(this.pickableNode);
@@ -351,23 +361,44 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
             if (results.size() > 0) {
                 CollisionResult closest = results.getClosestCollision();
                 Geometry tower = f.createTower(closest.getContactPoint());
-                
-//                switch (this.getTowerType()) {
-//                    case "1":
-//                        tower.getMaterial().setColor("Color", ColorRGBA.Red);
-//                        break;
-//                    case "2":
-//                        tower.getMaterial().setColor("Color", ColorRGBA.Blue);
-//                        break;
-//                    case "3":
-//                        tower.getMaterial().setColor("Color", ColorRGBA.Brown);
-//                        break;
-//                }
+
+                switch (this.typeTower) {
+                    case "1":
+                        tower.getMaterial().setColor("Color", ColorRGBA.Green);
+                        break;
+                    case "2":
+                        tower.getMaterial().setColor("Color", ColorRGBA.Blue);
+                        break;
+                    case "3":
+                        tower.getMaterial().setColor("Color", ColorRGBA.Red);
+                        break;
+                }
 
                 tower.addControl(new TowerControl(this));
                 this.towerNode.attachChild(tower);
                 this.numberOfTowerAvailable--;
                 this.rootNode.detachChild(this.pickableNode);
+            }
+        }
+    }
+
+    private void selectableTower() {
+
+        CollisionResults results = new CollisionResults();
+        Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
+        Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
+        direction.subtractLocal(origin).normalizeLocal();
+        Ray ray = new Ray(origin, direction);
+
+        this.app.getRootNode().collideWith(ray, results);
+
+        if (results.size() > 0) {
+            CollisionResult closest = results.getClosestCollision();
+
+            if (closest.getGeometry().getName().equals("tower")) {
+                AmbientLight al = new AmbientLight();
+                al.setColor(ColorRGBA.White.mult(1.5f));
+                closest.getGeometry().addLight(al);
             }
         }
     }
@@ -402,7 +433,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
             cam.setLocation(new Vector3f(-15f, 80f, 0f));
             cam.lookAt(new Vector3f(-15f, 0f, 0f), Vector3f.UNIT_Y);
         } else {
-            // View Normal
+            // Vue Normal
             cam.setLocation(new Vector3f(15f, 50f, 50f));
             cam.lookAt(new Vector3f(15f, 0f, 10f), Vector3f.UNIT_Y);
         }
@@ -425,19 +456,26 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
 
     public void towerClick(String tower) {
 
-        nifty.getCurrentScreen().findElementByName("imgTowerOption").getRenderer(ImageRenderer.class).setImage(nifty.getCurrentScreen().findElementByName("imgTower" + tower).getRenderer(ImageRenderer.class).getImage());
+        if (this.numberOfTowerAvailable != 0) {
 
-        switch (tower) {
-            case "1":
-                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Tir rapide");
-                break;
-            case "2":
-                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Ralenti la cible");
-                break;
-            case "3":
-                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Tir lent");
-                break;
+            this.typeTower = tower;
+
+            nifty.getCurrentScreen().findElementByName("imgTowerOption").getRenderer(ImageRenderer.class).setImage(nifty.getCurrentScreen().findElementByName("imgTower" + tower).getRenderer(ImageRenderer.class).getImage());
+
+            switch (tower) {
+                case "1":
+                    nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Tir rapide");
+                    p.getMaterial().setColor("Color", ColorRGBA.Green);
+                    break;
+                case "2":
+                    nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Ralenti la cible");
+                    p.getMaterial().setColor("Color", ColorRGBA.Blue);
+                    break;
+                case "3":
+                    nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Tir lent");
+                    p.getMaterial().setColor("Color", ColorRGBA.Red);
+                    break;
+            }
         }
-
     }
 }
