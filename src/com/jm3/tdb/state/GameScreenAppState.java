@@ -491,13 +491,12 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         }
         else // Acheté
         {
-            Element niftyPopup = nifty.createPopup("niftyPopupMenu");
-            nifty.showPopup(nifty.getCurrentScreen(), niftyPopup.getId(), null);
+            nifty.createPopup("niftyPopupMenu");
+            nifty.showPopup(nifty.getCurrentScreen(), "niftyPopupMenu", null);
         }
     }
     
     public void buyTower() {
-        Element niftyPopup = nifty.createPopup("niftyPopupMenu");
-        nifty.closePopup(niftyPopup.getId());
+        nifty.closePopup("niftyPopupMenu");
     }
 }
