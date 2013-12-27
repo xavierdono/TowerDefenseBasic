@@ -3,9 +3,15 @@
 
     <useStyles filename="nifty-default-styles.xml" />
     <useControls filename="nifty-default-controls.xml" />
-
+          
+    <popup id="niftyPopupMenu" childLayout="vertical" width="50%" height="50%">
+        <panel width="50%" height="50%" childLayout="vertical" backgroundColor="#00FF">
+            <control name="label" text="test" />
+        </panel>
+    </popup>
+            
     <screen id="start" controller="com.jm3.tdb.state.GameScreenAppState">
-  
+
         <layer id="layer" childLayout="horizontal">
             
             <panel id="panelGame" height="100%" width="60%" align="center" valign="center" childLayout="vertical" visibleToMouse="false">
@@ -20,8 +26,11 @@
                     <control id="lblLevel" name="label" text="1" align="center" valign="center" x="140" y="30" />
                     
                     <control name="label" text="Budget :" align="center" valign="center" x="100" y="50" />
-                    <control id="lblBudget" name="label" text="0" align="center" valign="center" x="160" y="50" />
+                    <control id="lblBudget" name="label" text="40" align="center" valign="center" x="160" y="50" />
                     <image id="imgBudget" filename= "Interface/budget.png" imageMode="normal" valign="center" x="165" y="45" />
+                    
+                    <control name="label" text="Tower available :" align="center" valign="center" x="100" y="70" />
+                    <control id="lblTower" name="label" text="2" align="center" valign="center" x="200" y="70" />
                     
                 </panel>
 

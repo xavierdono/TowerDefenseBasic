@@ -54,6 +54,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
     private Node beamNode;
     private Element niftylblBudget;
     private Element niftylblLevel;
+    private Element niftylblTower;
     private Nifty nifty;
     private String score;
     private int health;
@@ -130,7 +131,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         this.inputManager.addMapping("move", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
         this.inputManager.addListener(actionListener, "select", "quit", "move", "restart");
 
-        this.budget = 0;
+        this.budget = 40;
         this.health = 1;
         this.numberOfTowerAvailable = 2;
         this.timeBeforeAttack = 15;
@@ -208,12 +209,13 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         nifty.fromXml("Interface/gameUI.xml", "start");
         niftylblBudget = nifty.getCurrentScreen().findElementByName("lblBudget");
         niftylblLevel = nifty.getCurrentScreen().findElementByName("lblLevel");
+        niftylblTower = nifty.getCurrentScreen().findElementByName("lblTower");
 
         this.app.getGuiViewPort().addProcessor(niftyDisplay);
 
-        Logger.getLogger("").setLevel(Level.SEVERE);
-        Logger.getLogger("de.lessvoid.nifty").setLevel(Level.SEVERE);
-        Logger.getLogger("NiftyInputEventHandlingLog").setLevel(Level.SEVERE);
+        Logger.getLogger("").setLevel(Level.OFF);
+        Logger.getLogger("de.lessvoid.nifty").setLevel(Level.WARNING);
+        Logger.getLogger("NiftyInputEventHandlingLog").setLevel(Level.WARNING);
     }
 
     private float randRange(float min, float max) {
@@ -251,6 +253,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
 
         niftylblBudget.getRenderer(TextRenderer.class).setText(String.valueOf(getBudget()));
         niftylblLevel.getRenderer(TextRenderer.class).setText(String.valueOf(getLevel()));
+        niftylblTower.getRenderer(TextRenderer.class).setText(String.valueOf(this.numberOfTowerAvailable));
 
         if (getHealth() <= 0) {
             // TODO : Afficher un ecran perdu
@@ -361,16 +364,20 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
             if (results.size() > 0) {
                 CollisionResult closest = results.getClosestCollision();
                 Geometry tower = f.createTower(closest.getContactPoint());
+                tower.setUserData("type", this.typeTower);
 
                 switch (this.typeTower) {
                     case "1":
                         tower.getMaterial().setColor("Color", ColorRGBA.Green);
+                        this.budget -= 20;
                         break;
                     case "2":
                         tower.getMaterial().setColor("Color", ColorRGBA.Blue);
+                        this.budget -= 30;
                         break;
                     case "3":
                         tower.getMaterial().setColor("Color", ColorRGBA.Red);
+                        this.budget -= 40;
                         break;
                 }
 
@@ -378,6 +385,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                 this.towerNode.attachChild(tower);
                 this.numberOfTowerAvailable--;
                 this.rootNode.detachChild(this.pickableNode);
+                niftylblBudget.getRenderer(TextRenderer.class).setText(String.valueOf(getBudget()));
             }
         }
     }
@@ -399,6 +407,10 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                 AmbientLight al = new AmbientLight();
                 al.setColor(ColorRGBA.White.mult(1.5f));
                 closest.getGeometry().addLight(al);
+
+                nifty.getCurrentScreen().findElementByName("imgTowerOption").getRenderer(ImageRenderer.class).setImage(nifty.getCurrentScreen().findElementByName("imgTower" + closest.getGeometry().getUserData("type")).getRenderer(ImageRenderer.class).getImage());
+                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("");
+
             }
         }
     }
@@ -477,5 +489,15 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                     break;
             }
         }
+        else // Acheté
+        {
+            Element niftyPopup = nifty.createPopup("niftyPopupMenu");
+            nifty.showPopup(nifty.getCurrentScreen(), niftyPopup.getId(), null);
+        }
+    }
+    
+    public void buyTower() {
+        Element niftyPopup = nifty.createPopup("niftyPopupMenu");
+        nifty.closePopup(niftyPopup.getId());
     }
 }
