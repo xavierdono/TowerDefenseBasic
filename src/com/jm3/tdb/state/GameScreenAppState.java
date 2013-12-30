@@ -353,7 +353,8 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
     }
 
     private void addTower() {
-        if (this.numberOfTowerAvailable != 0) {
+
+        if (this.numberOfTowerAvailable != 0 && this.budget > 0) {
             CollisionResults results = new CollisionResults();
             Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
             Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
@@ -387,6 +388,8 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                 this.numberOfTowerAvailable--;
                 this.rootNode.detachChild(this.pickableNode);
                 niftylblBudget.getRenderer(TextRenderer.class).setText(String.valueOf(getBudget()));
+                
+                // TODO : Disavailable the tower that we can't buy
             }
         }
     }
@@ -411,7 +414,8 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
 
                 nifty.getCurrentScreen().findElementByName("imgTowerOption").getRenderer(ImageRenderer.class).setImage(nifty.getCurrentScreen().findElementByName("imgTower" + closest.getGeometry().getUserData("type")).getRenderer(ImageRenderer.class).getImage());
                 nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("");
-
+                
+                // TODO : Added a new button to buy or upgrade a tower
             }
         }
     }
@@ -489,15 +493,10 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                     p.getMaterial().setColor("Color", ColorRGBA.Red);
                     break;
             }
-        } else // Acheter une tour
-        {
-            nifty.showPopup(nifty.getCurrentScreen(), "niftyPopupMenu", null);
-            System.out.println("showPopup");
         }
     }
 
     public void buyTower() {
-        nifty.closePopup("niftyPopupMenu");
         System.out.println("buyTower");
     }
 }
