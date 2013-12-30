@@ -207,6 +207,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         nifty = niftyDisplay.getNifty();
         nifty.registerScreenController(this);
         nifty.fromXml("Interface/gameUI.xml", "start");
+        nifty.createPopupWithId("niftyPopupMenu", "niftyPopupMenu");
         niftylblBudget = nifty.getCurrentScreen().findElementByName("lblBudget");
         niftylblLevel = nifty.getCurrentScreen().findElementByName("lblLevel");
         niftylblTower = nifty.getCurrentScreen().findElementByName("lblTower");
@@ -488,15 +489,15 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                     p.getMaterial().setColor("Color", ColorRGBA.Red);
                     break;
             }
-        }
-        else // Acheté
+        } else // Acheter une tour
         {
-            nifty.createPopup("niftyPopupMenu");
             nifty.showPopup(nifty.getCurrentScreen(), "niftyPopupMenu", null);
+            System.out.println("showPopup");
         }
     }
-    
+
     public void buyTower() {
         nifty.closePopup("niftyPopupMenu");
+        System.out.println("buyTower");
     }
 }

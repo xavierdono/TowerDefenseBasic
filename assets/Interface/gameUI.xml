@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nifty xmlns="http://nifty-gui.sourceforge.net/nifty-1.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://nifty-gui.sourceforge.net/nifty-1.3.xsd http://nifty-gui.sourceforge.net/nifty-1.3.xsd">
-
+    
     <useStyles filename="nifty-default-styles.xml" />
     <useControls filename="nifty-default-controls.xml" />
 
@@ -78,13 +78,27 @@
             
         </layer>
     </screen>
-    
-    <popup id="niftyPopupMenu" backgroundColor="#0ee9" childLayout="center">
-        <panel id="panel_bottem" height="100%" width="100%" valign="top" childLayout="center">
-            <control name="button" label="but1" id="Button1" align="center" valign="top" visibleToMouse="true">
-                <interact onRelease = "buyTower()" />
-            </control>
+
+    <popup id="niftyPopupMenu" childLayout="center" backgroundColor="#0001">
+        <panel style="nifty-panel" childLayout="center" padding="18px,28px,40px,16px" width="30%" height="20%" align="center" valign="center">
+            <panel childLayout="vertical" align="center" valign="center">
+                <panel childLayout="center" height="70%" width="100%">
+                    <text text="Really want to Exit?" style="base-font" align="center" valign="center" color="#000f"/>
+                </panel>
+                <panel childLayout="horizontal" align="center" height="30%">
+                    <panel childLayout="center" width="50%">
+                        <control id="yesButton" name="button" label="Yes" width="100px" align="center">
+                            <interact onClick="buyTower()" /> 
+                        </control>
+                    </panel>
+                    <panel childLayout="center" width="50%">
+                        <control id="noButton" name="button" label="No" width="100px" align="center">
+                            <interact onClick="buyTower()" /> 
+                        </control>
+                    </panel>
+                </panel>
+            </panel>
         </panel>
     </popup>
-    
+   
 </nifty>
