@@ -31,6 +31,7 @@ import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.elements.render.TextRenderer;
+import de.lessvoid.nifty.render.NiftyImage;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import java.util.List;
@@ -389,7 +390,23 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                 this.rootNode.detachChild(this.pickableNode);
                 niftylblBudget.getRenderer(TextRenderer.class).setText(String.valueOf(getBudget()));
                 
-                // TODO : Disavailable the tower that we can't buy
+                // Disavailable the tower that we can't buy
+                NiftyImage newImage = null;
+                
+                if(this.budget < 20) {
+                    newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl1_off.png", false);
+                    nifty.getCurrentScreen().findElementByName("imgTower1").getRenderer(ImageRenderer.class).setImage(newImage);
+                } 
+                
+                if(this.budget < 30) {
+                    newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl2_off.png", false);
+                    nifty.getCurrentScreen().findElementByName("imgTower2").getRenderer(ImageRenderer.class).setImage(newImage);
+                }
+                
+                if(this.budget < 40) {
+                    newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl3_off.png", false);
+                    nifty.getCurrentScreen().findElementByName("imgTower3").getRenderer(ImageRenderer.class).setImage(newImage);
+                }
             }
         }
     }
