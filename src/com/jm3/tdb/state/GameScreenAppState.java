@@ -28,6 +28,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.controls.button.ButtonControl;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.elements.render.TextRenderer;
@@ -65,6 +66,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
     private int healthOfCreeps;
     private int timeBeforeAttack;
     private int numberOfTowerAvailable;
+    private boolean enoughMoney;
     private Geometry p;
     private float timer_beam;
     private BitmapText hudText;
@@ -142,6 +144,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         this.systemTimeElapsed = 0;
         this.prevUpdate = -1;
         this.level = 1;
+        this.enoughMoney = true;
 
         BitmapFont guiFont = this.assetManager.loadFont("Interface/Fonts/Default.fnt");
         BitmapText infoText = new BitmapText(guiFont, false);
@@ -215,6 +218,8 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
 
         this.app.getGuiViewPort().addProcessor(niftyDisplay);
 
+        nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).disable();
+
         Logger.getLogger("").setLevel(Level.OFF);
         Logger.getLogger("de.lessvoid.nifty").setLevel(Level.WARNING);
         Logger.getLogger("NiftyInputEventHandlingLog").setLevel(Level.WARNING);
@@ -226,6 +231,9 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
 
     @Override
     public void update(float tpf) {
+
+        availableTower("0");
+
         currTime = System.currentTimeMillis();
 
         if (prevUpdate != -1) {
@@ -280,15 +288,15 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
             hudText.setText(score);
         }
 
-        CollisionResults results = new CollisionResults();
-        Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
-        Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
-        direction.subtractLocal(origin).normalizeLocal();
-        Ray ray = new Ray(origin, direction);
+        if (this.budget > 0 && this.numberOfTowerAvailable != 0 && this.enoughMoney) {
+            CollisionResults results = new CollisionResults();
+            Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
+            Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
+            direction.subtractLocal(origin).normalizeLocal();
+            Ray ray = new Ray(origin, direction);
 
-        this.app.getRootNode().collideWith(ray, results);
+            this.app.getRootNode().collideWith(ray, results);
 
-        if (this.numberOfTowerAvailable != 0) {
             if (results.size() > 0) {
                 CollisionResult closest = results.getClosestCollision();
 
@@ -304,6 +312,9 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                 isPickable = false;
                 this.rootNode.detachChild(this.pickableNode);
             }
+        } else {
+            isPickable = false;
+            this.rootNode.detachChild(this.pickableNode);
         }
     }
 
@@ -372,68 +383,29 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                 switch (this.typeTower) {
                     case "1":
                         tower.getMaterial().setColor("Color", ColorRGBA.Green);
-                        this.budget -= 20;
+                        tower.setUserData("cost", "20");
                         break;
                     case "2":
                         tower.getMaterial().setColor("Color", ColorRGBA.Blue);
-                        this.budget -= 30;
+                        tower.setUserData("cost", "30");
                         break;
                     case "3":
                         tower.getMaterial().setColor("Color", ColorRGBA.Red);
-                        this.budget -= 40;
+                        tower.setUserData("cost", "40");
                         break;
                 }
 
-                tower.addControl(new TowerControl(this));
-                this.towerNode.attachChild(tower);
-                this.numberOfTowerAvailable--;
-                this.rootNode.detachChild(this.pickableNode);
-                niftylblBudget.getRenderer(TextRenderer.class).setText(String.valueOf(getBudget()));
-                
                 // Disavailable the tower that we can't buy
-                NiftyImage newImage = null;
-                
-                if(this.budget < 20) {
-                    newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl1_off.png", false);
-                    nifty.getCurrentScreen().findElementByName("imgTower1").getRenderer(ImageRenderer.class).setImage(newImage);
-                } 
-                
-                if(this.budget < 30) {
-                    newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl2_off.png", false);
-                    nifty.getCurrentScreen().findElementByName("imgTower2").getRenderer(ImageRenderer.class).setImage(newImage);
-                }
-                
-                if(this.budget < 40) {
-                    newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl3_off.png", false);
-                    nifty.getCurrentScreen().findElementByName("imgTower3").getRenderer(ImageRenderer.class).setImage(newImage);
+                if (availableTower(tower.getUserData("cost").toString())) {
+                    tower.addControl(new TowerControl(this));
+                    this.towerNode.attachChild(tower);
+                    this.numberOfTowerAvailable--;
+                    this.rootNode.detachChild(this.pickableNode);
+                    niftylblBudget.getRenderer(TextRenderer.class).setText(String.valueOf(getBudget()));
                 }
             }
-        }
-    }
-
-    private void selectableTower() {
-
-        CollisionResults results = new CollisionResults();
-        Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
-        Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
-        direction.subtractLocal(origin).normalizeLocal();
-        Ray ray = new Ray(origin, direction);
-
-        this.app.getRootNode().collideWith(ray, results);
-
-        if (results.size() > 0) {
-            CollisionResult closest = results.getClosestCollision();
-
-            if (closest.getGeometry().getName().equals("tower")) {
-                AmbientLight al = new AmbientLight();
-                al.setColor(ColorRGBA.White.mult(1.5f));
-                closest.getGeometry().addLight(al);
-
-                nifty.getCurrentScreen().findElementByName("imgTowerOption").getRenderer(ImageRenderer.class).setImage(nifty.getCurrentScreen().findElementByName("imgTower" + closest.getGeometry().getUserData("type")).getRenderer(ImageRenderer.class).getImage());
-                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("");
-                
-                // TODO : Added a new button to buy or upgrade a tower
-            }
+        } else if (this.budget >= 0) {
+            // TODO : Buy the tower
         }
     }
 
@@ -490,30 +462,122 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
 
     public void towerClick(String tower) {
 
-        if (this.numberOfTowerAvailable != 0) {
+        NiftyImage newImage = null;
+        this.typeTower = tower;
 
-            this.typeTower = tower;
+        switch (tower) {
+            case "1":
+                newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl1.png", false);
+                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Tir rapide");
+                p.getMaterial().setColor("Color", ColorRGBA.Green);
+                break;
+            case "2":
+                newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl2.png", false);
+                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Ralenti la cible");
+                p.getMaterial().setColor("Color", ColorRGBA.Blue);
+                break;
+            case "3":
+                newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl3.png", false);
+                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Tir lent");
+                p.getMaterial().setColor("Color", ColorRGBA.Red);
+                break;
+        }
 
-            nifty.getCurrentScreen().findElementByName("imgTowerOption").getRenderer(ImageRenderer.class).setImage(nifty.getCurrentScreen().findElementByName("imgTower" + tower).getRenderer(ImageRenderer.class).getImage());
+        nifty.getCurrentScreen().findElementByName("imgTowerOption").getRenderer(ImageRenderer.class).setImage(newImage);
 
-            switch (tower) {
-                case "1":
-                    nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Tir rapide");
-                    p.getMaterial().setColor("Color", ColorRGBA.Green);
-                    break;
-                case "2":
-                    nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Ralenti la cible");
-                    p.getMaterial().setColor("Color", ColorRGBA.Blue);
-                    break;
-                case "3":
-                    nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Tir lent");
-                    p.getMaterial().setColor("Color", ColorRGBA.Red);
-                    break;
+        // TODO : BUY
+        nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).enable();
+        nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).setText("BUY");
+    }
+
+    private void selectableTower() {
+
+        CollisionResults results = new CollisionResults();
+        Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
+        Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
+        direction.subtractLocal(origin).normalizeLocal();
+        Ray ray = new Ray(origin, direction);
+
+        this.app.getRootNode().collideWith(ray, results);
+
+        if (results.size() > 0) {
+            CollisionResult closest = results.getClosestCollision();
+
+            if (closest.getGeometry().getName().equals("tower")) {
+                AmbientLight al = new AmbientLight();
+                al.setColor(ColorRGBA.White.mult(1.5f));
+                closest.getGeometry().addLight(al);
+
+                NiftyImage newImage = null;
+
+                switch (closest.getGeometry().getUserData("type").toString()) {
+                    case "1":
+                        newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl1.png", false);
+                        break;
+                    case "2":
+                        newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl2.png", false);
+                        break;
+                    case "3":
+                        newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl3.png", false);
+                        break;
+                }
+
+                nifty.getCurrentScreen().findElementByName("imgTowerOption").getRenderer(ImageRenderer.class).setImage(newImage);
+                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("");
+
+                // Upgrade the tower
+                nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).enable();
+                nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).setText("UPGRADE");
             }
         }
     }
 
-    public void buyTower() {
-        System.out.println("buyTower");
+    public void optionTower() {
+        if (nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).getText().equals("BUY")) {
+            if (this.budget >= 20) {
+                this.numberOfTowerAvailable++;
+                // TODO : Decrease the budget
+            } else {
+                // UPGRADE
+            }
+        }
+    }
+
+    private boolean availableTower(String cost) {
+
+        if (this.budget - Integer.parseInt(cost) >= 0) {
+            this.enoughMoney = true;
+            this.budget -= Integer.parseInt(cost);
+        } else {
+            this.enoughMoney = false;
+        }
+
+        NiftyImage newImage = null;
+
+        if (this.budget < 20) {
+            newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl1_off.png", false);
+            nifty.getCurrentScreen().findElementByName("imgTower1").getRenderer(ImageRenderer.class).setImage(newImage);
+        } else {
+            newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl1.png", false);
+            nifty.getCurrentScreen().findElementByName("imgTower1").getRenderer(ImageRenderer.class).setImage(newImage);
+        }
+
+        if (this.budget < 30) {
+            newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl2_off.png", false);
+            nifty.getCurrentScreen().findElementByName("imgTower2").getRenderer(ImageRenderer.class).setImage(newImage);
+        } else {
+            newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl2.png", false);
+            nifty.getCurrentScreen().findElementByName("imgTower2").getRenderer(ImageRenderer.class).setImage(newImage);
+        }
+
+        if (this.budget < 40) {
+            newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl3_off.png", false);
+            nifty.getCurrentScreen().findElementByName("imgTower3").getRenderer(ImageRenderer.class).setImage(newImage);
+        } else {
+            newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl3.png", false);
+            nifty.getCurrentScreen().findElementByName("imgTower3").getRenderer(ImageRenderer.class).setImage(newImage);
+        }
+
+        return this.enoughMoney;
     }
 }

@@ -60,6 +60,10 @@
                     
                     <control id="lblOption" name="label" text="Tir rapide" align="left" valign="center"/>
                     
+                    <control id="btnOption" name="button" label="BUY" visible="true" visibleToMouse="true">
+                        <interact onClick="optionTower()"/>
+                    </control>
+                    
                     <panel width="*"/>
                     
                 </panel>
