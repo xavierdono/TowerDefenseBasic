@@ -404,8 +404,6 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                     niftylblBudget.getRenderer(TextRenderer.class).setText(String.valueOf(getBudget()));
                 }
             }
-        } else if (this.budget >= 0) {
-            // TODO : Buy the tower
         }
     }
 
@@ -468,24 +466,23 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         switch (tower) {
             case "1":
                 newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl1.png", false);
-                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Tir rapide");
+                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Tir rapide (20)");
                 p.getMaterial().setColor("Color", ColorRGBA.Green);
                 break;
             case "2":
                 newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl2.png", false);
-                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Ralenti la cible");
+                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Ralenti la cible (30)");
                 p.getMaterial().setColor("Color", ColorRGBA.Blue);
                 break;
             case "3":
                 newImage = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Interface/tower_lvl3.png", false);
-                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Tir lent");
+                nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Tir lent (40)");
                 p.getMaterial().setColor("Color", ColorRGBA.Red);
                 break;
         }
 
         nifty.getCurrentScreen().findElementByName("imgTowerOption").getRenderer(ImageRenderer.class).setImage(newImage);
 
-        // TODO : BUY
         nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).enable();
         nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).setText("BUY");
     }
@@ -525,7 +522,6 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                 nifty.getCurrentScreen().findElementByName("imgTowerOption").getRenderer(ImageRenderer.class).setImage(newImage);
                 nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("");
 
-                // Upgrade the tower
                 nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).enable();
                 nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).setText("UPGRADE");
             }
@@ -534,13 +530,23 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
 
     public void optionTower() {
         if (nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).getText().equals("BUY")) {
-            if (this.budget >= 20) {
+            if (this.budget >= 20 && this.typeTower.equals("1")) {
                 this.numberOfTowerAvailable++;
-                // TODO : Decrease the budget
-            } else {
-                // UPGRADE
+                this.budget -= 20;
+            } else if (this.budget >= 30 && this.typeTower.equals("2")) {
+                this.numberOfTowerAvailable++;
+                this.budget -= 30;
+            } else if (this.budget >= 40 && this.typeTower.equals("3")) {
+                this.numberOfTowerAvailable++;
+                this.budget -= 40;
             }
         }
+        else
+        {
+            // TODO : UPGRADE
+        }
+
+        niftylblBudget.getRenderer(TextRenderer.class).setText(String.valueOf(getBudget()));
     }
 
     private boolean availableTower(String cost) {
