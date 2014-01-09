@@ -52,15 +52,15 @@
                                      
                 </panel>
             
-                <panel id="panelOptionUpdate" height="40%" width="100%" align="left" valign="top" childLayout="horizontal" backgroundImage="/Interface/panel.png">
+                <panel id="panelOptionUpdate" height="40%" width="100%" align="left" valign="center" childLayout="horizontal" backgroundImage="/Interface/panel.png">
                 
                     <panel width="100px"/>
                     
-                    <image id = "imgTowerOption" filename= "Interface/tower_lvl1.png" imageMode="normal" valign="center"/>
+                    <image id = "imgTowerOption" filename="Interface/tower_lvl0.png" imageMode="normal" valign="center"/>
                     
-                    <control id="lblOption" name="label" text="Tir rapide" align="left" valign="center"/>
+                    <control id="lblOption" name="label" text="" align="left" wrap="true" valign="center"/>
                     
-                    <control id="btnOption" name="button" label="BUY" visible="true" visibleToMouse="true">
+                    <control id="btnOption" name="button" label="BUY" visibleToMouse="true" valign="center">
                         <interact onClick="optionTower()"/>
                     </control>
                     

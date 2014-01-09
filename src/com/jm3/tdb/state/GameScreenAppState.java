@@ -196,9 +196,6 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         }
 
         p = f.createTower(new Vector3f(0, 0, 0));
-        this.typeTower = "1";
-
-        this.pickableNode.attachChild(p);
 
         this.rootNode.attachChild(this.playerBaseNode);
         this.rootNode.attachChild(this.towerNode);
@@ -217,8 +214,6 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         niftylblTower = nifty.getCurrentScreen().findElementByName("lblTower");
 
         this.app.getGuiViewPort().addProcessor(niftyDisplay);
-
-        nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).disable();
 
         Logger.getLogger("").setLevel(Level.OFF);
         Logger.getLogger("de.lessvoid.nifty").setLevel(Level.WARNING);
@@ -288,7 +283,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
             hudText.setText(score);
         }
 
-        if (this.budget > 0 && this.numberOfTowerAvailable != 0 && this.enoughMoney) {
+        if (this.budget > 0 && this.numberOfTowerAvailable != 0 && this.enoughMoney && !this.pickableNode.getChildren().isEmpty()) {
             CollisionResults results = new CollisionResults();
             Vector3f origin = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.0f);
             Vector3f direction = this.app.getCamera().getWorldCoordinates(this.app.getInputManager().getCursorPosition(), 0.3f);
@@ -432,6 +427,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
 
     private void moveCamera() {
 
+        // TODO : La vue de dessus ne fonctionne pas
         if (swapView) {
             // Vue de dessus
             cam.setLocation(new Vector3f(-15f, 80f, 0f));
@@ -460,6 +456,10 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
 
     public void towerClick(String tower) {
 
+        if (this.pickableNode.getChildren().isEmpty()) {
+            this.pickableNode.attachChild(p);
+        }
+
         NiftyImage newImage = null;
         this.typeTower = tower;
 
@@ -483,7 +483,6 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
 
         nifty.getCurrentScreen().findElementByName("imgTowerOption").getRenderer(ImageRenderer.class).setImage(newImage);
 
-        nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).enable();
         nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).setText("BUY");
     }
 
@@ -522,14 +521,13 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                 nifty.getCurrentScreen().findElementByName("imgTowerOption").getRenderer(ImageRenderer.class).setImage(newImage);
                 nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("");
 
-                nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).enable();
                 nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).setText("UPGRADE");
             }
         }
     }
 
     public void optionTower() {
-        if (nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).getText().equals("BUY")) {
+        if (nifty.getCurrentScreen().findControl("btnOption", ButtonControl.class).getText().equals("BUY") && this.typeTower != null) {
             if (this.budget >= 20 && this.typeTower.equals("1")) {
                 this.numberOfTowerAvailable++;
                 this.budget -= 20;
@@ -540,9 +538,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                 this.numberOfTowerAvailable++;
                 this.budget -= 40;
             }
-        }
-        else
-        {
+        } else {
             // TODO : UPGRADE
         }
 
