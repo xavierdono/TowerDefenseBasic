@@ -107,7 +107,7 @@ public final class Factory {
     }
 
     public Geometry createAuthorizeZone(Vector3f location) {
-        Box boxMesh = new Box(2f, 0.1f, 10f);
+        Box boxMesh = new Box(1f, 0.1f, 10f);
         Geometry boxFloor = new Geometry("authorize", boxMesh);
         Material boxMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         boxMat.setColor("Color", ColorRGBA.White);

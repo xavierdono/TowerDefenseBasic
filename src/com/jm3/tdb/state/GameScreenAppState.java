@@ -76,6 +76,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
     private long currTime;
     private int updateTimeElapsed;
     private int systemTimeElapsed;
+    private int index;
     private long prevUpdate;
     private String typeTower;
     private ActionListener actionListener = new ActionListener() {
@@ -145,6 +146,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         this.prevUpdate = -1;
         this.level = 1;
         this.enoughMoney = true;
+        this.index = 0;
 
         BitmapFont guiFont = this.assetManager.loadFont("Interface/Fonts/Default.fnt");
         BitmapText infoText = new BitmapText(guiFont, false);
@@ -176,8 +178,8 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         f.setCreepHealth(getHealthOfCreeps());
 
         final Geometry floor = f.createFloor(Vector3f.ZERO);
-        final Geometry authorizeZoneLeft = f.createAuthorizeZone(new Vector3f(-6f, 0, 0));
-        final Geometry authorizeZoneRight = f.createAuthorizeZone(new Vector3f(6f, 0, 0));
+        final Geometry authorizeZoneLeft = f.createAuthorizeZone(new Vector3f(-5f, 0, 0));
+        final Geometry authorizeZoneRight = f.createAuthorizeZone(new Vector3f(5f, 0, 0));
         final Geometry path = f.createPath(new Vector3f(0, 0, -2.5f));
         final Geometry playerBase = f.createPlayerBase(new Vector3f(0, 0, -20));
         final Geometry line = f.createLine(Vector3f.ZERO);
@@ -189,7 +191,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         this.playerBaseNode.attachChild(path);
         this.playerBaseNode.attachChild(playerBase);
 
-        for (int index = 0; index < getNumberOfCreeps(); index++) {
+        for (int i = 0; i < getNumberOfCreeps(); i++) {
             final Geometry creep = f.createCreep(new Vector3f(randRange(-3, 3), 0, randRange(17, 30)));
             creep.addControl(new CreepControl(this));
             this.creepNode.attachChild(creep);
@@ -273,7 +275,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
             this.updateTimeElapsed = 0;
             this.systemTimeElapsed = 0;
 
-            for (int index = 0; index < getNumberOfCreeps(); index++) {
+            for (int i = 0; i < getNumberOfCreeps(); i++) {
                 final Geometry creep = f.createCreep(new Vector3f(randRange(-3, 3), 0, randRange(17, 30)));
                 creep.addControl(new CreepControl(this));
 
@@ -374,6 +376,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                 CollisionResult closest = results.getClosestCollision();
                 Geometry tower = f.createTower(closest.getContactPoint());
                 tower.setUserData("type", this.typeTower);
+                tower.setUserData("index", this.index++);
 
                 switch (this.typeTower) {
                     case "1":
@@ -518,6 +521,8 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                         break;
                 }
 
+                this.index = Integer.parseInt(closest.getGeometry().getUserData("index").toString());
+                
                 nifty.getCurrentScreen().findElementByName("imgTowerOption").getRenderer(ImageRenderer.class).setImage(newImage);
                 nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("");
 
@@ -539,7 +544,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                 this.budget -= 40;
             }
         } else {
-            // TODO : UPGRADE
+            // TODO : UPGRADE this.index
         }
 
         niftylblBudget.getRenderer(TextRenderer.class).setText(String.valueOf(getBudget()));
