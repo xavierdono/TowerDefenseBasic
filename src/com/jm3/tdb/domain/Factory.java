@@ -5,6 +5,7 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
 
@@ -17,29 +18,13 @@ public final class Factory {
         this.assetManager = as;
     }
 
-    public Geometry createTower(Vector3f location) {
+    public Spatial createTower(Vector3f location) {
 
-        Box boxMesh = new Box(1f, 4f, 1f);
-        Geometry boxTower = new Geometry("tower", boxMesh);
-        Material boxMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        boxMat.setColor("Color", ColorRGBA.Green);
-        boxTower.setMaterial(boxMat);
-        boxTower.setLocalTranslation(location.addLocal(0, boxMesh.getYExtent(), 0));
+        Spatial spatial = assetManager.loadModel("Models/Tree/Tree.mesh.j3o");
+        spatial.scale(2);
+        spatial.setLocalTranslation(location.addLocal(0, spatial.getLocalTransform().getTranslation().getY(), 0));
 
-//        // Perimetre
-//        Circle3d circle = new Circle3d(Vector3f.ZERO, 5f, 32);
-//
-//        Geometry geom = new Geometry("circle", circle);
-//        geom.updateModelBound();
-//
-//        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-//        mat.setColor("Color", ColorRGBA.Red);
-//        geom.setMaterial(mat);
-//        geom.setLocalTranslation(location.addLocal(0, -boxMesh.getYExtent() + 0.1f, 0));
-//        rootNode.attachChild(geom);
-
-        return boxTower;
-
+        return spatial;
     }
 
     public Geometry createCreep(Vector3f location) {
@@ -69,7 +54,6 @@ public final class Factory {
         boxBase.setLocalTranslation(location.addLocal(0, boxMesh.getYExtent(), 0));
 
         return boxBase;
-
     }
 
     public Geometry createPath(Vector3f location) {
@@ -82,7 +66,6 @@ public final class Factory {
         boxPath.setMaterial(boxMat);
 
         return boxPath;
-
     }
 
     public Geometry createFloor(Vector3f location) {
