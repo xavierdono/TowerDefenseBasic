@@ -17,7 +17,8 @@ import java.util.List;
 public class TowerControl extends AbstractControl {
 
     private GameScreenAppState app;
-
+    private int damage = 1;
+    
     public TowerControl(GameScreenAppState app) {
         this.app = app;
     }
@@ -55,7 +56,7 @@ public class TowerControl extends AbstractControl {
                 boxMat.setColor("Color", ColorRGBA.Red);
                 beam_geo.setMaterial(boxMat);
                 this.app.addBeam(beam_geo);
-                creep.decreaseCreepHealth();
+                creep.decreaseCreepHealth(getDamage());
             }
         }
     }
@@ -67,5 +68,13 @@ public class TowerControl extends AbstractControl {
     public Vector3f getTowerTop() {
         Vector3f loc = spatial.getLocalTranslation();
         return new Vector3f(loc.x, loc.y + 4, loc.z);
+    }
+
+    public int getDamage() {
+        return damage;
+    }
+
+    public void setDamage(int damage) {
+        this.damage = damage;
     }
 }
