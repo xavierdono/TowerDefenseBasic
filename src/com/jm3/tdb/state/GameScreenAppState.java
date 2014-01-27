@@ -198,7 +198,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
             this.creepNode.attachChild(creep);
         }
 
-        p = f.createTower(new Vector3f(0, 0, 0));
+        p = f.createTower(new Vector3f(0, 0, 0), "-1");
 
         this.rootNode.attachChild(this.playerBaseNode);
         this.rootNode.attachChild(this.towerNode);
@@ -379,9 +379,9 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
 
             if (results.size() > 0) {
                 CollisionResult closest = results.getClosestCollision();
-                Spatial tower = f.createTower(closest.getContactPoint());
+                Spatial tower = f.createTower(closest.getContactPoint(), String.valueOf(++this.index));
                 tower.setUserData("type", this.typeTower);
-                tower.setUserData("index", this.index++);
+                tower.setUserData("index", this.index);
 
                 switch (this.typeTower) {
                     case "1":
@@ -512,7 +512,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
 
                 // Get the user data from the tower selected
                 for (Spatial s = closest.getGeometry(); s != null; s = s.getParent()) {
-                    if (s.getUserData("type") != null && s.getUserData("index") != null) {
+                    if (s.getUserData("index") != null) {
                         type = Integer.parseInt(s.getUserData("type").toString());
                         this.index = Integer.parseInt(s.getUserData("index").toString());
                         damage = s.getControl(TowerControl.class).getDamage();
@@ -555,13 +555,9 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
                 this.numberOfTowerAvailable++;
                 this.budget -= 40;
             }
-        } else {
-            // TODO : Get the user data from the tower upgradable
-            for (Spatial s : this.rootNode.getChildren()) {
-                if (s.getUserData("index") == this.index) {
-                    s.getControl(TowerControl.class).setDamage(20);
-                }
-            }
+        } else { // Upgrade
+            this.rootNode.getChild(String.valueOf(this.index)).getControl(TowerControl.class).setDamage(40);
+            nifty.getCurrentScreen().findElementByName("lblOption").getRenderer(TextRenderer.class).setText("Damage: " + this.rootNode.getChild(String.valueOf(this.index)).getControl(TowerControl.class).getDamage());
         }
 
         niftylblBudget.getRenderer(TextRenderer.class).setText(String.valueOf(getBudget()));

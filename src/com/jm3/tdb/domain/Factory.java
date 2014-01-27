@@ -18,9 +18,10 @@ public final class Factory {
         this.assetManager = as;
     }
 
-    public Spatial createTower(Vector3f location) {
+    public Spatial createTower(Vector3f location, String index) {
 
         Spatial spatial = assetManager.loadModel("Models/Tree/Tree.mesh.j3o");
+        spatial.setName(index);
         spatial.scale(2);
         spatial.setLocalTranslation(location.addLocal(0, spatial.getLocalTransform().getTranslation().getY(), 0));
 

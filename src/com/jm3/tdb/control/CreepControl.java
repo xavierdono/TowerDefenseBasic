@@ -36,7 +36,7 @@ public class CreepControl extends AbstractControl {
         } else {
             this.app.addBudget();
 
-            if (getHealth() == 0) {
+            if (getHealth() <= 0) {
                 spatial.removeFromParent();
                 spatial.removeControl(this);
             }
