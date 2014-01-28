@@ -75,6 +75,7 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
     private Boolean isPickable;
     private Boolean swapView = true;
     private long currTime;
+    private AmbientLight al;
     private int updateTimeElapsed;
     private int systemTimeElapsed;
     private int index;
@@ -222,6 +223,9 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
         sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f).normalizeLocal());
         rootNode.addLight(sun);
 
+        al = new AmbientLight();
+        al.setColor(ColorRGBA.White.mult(3f));
+        
         Logger.getLogger("").setLevel(Level.OFF);
         Logger.getLogger("de.lessvoid.nifty").setLevel(Level.WARNING);
         Logger.getLogger("NiftyInputEventHandlingLog").setLevel(Level.WARNING);
@@ -502,24 +506,22 @@ public class GameScreenAppState extends AbstractAppState implements ScreenContro
             CollisionResult closest = results.getClosestCollision();
 
             if (closest.getGeometry().getName().startsWith("Tree")) { // Tree-geom-2
-//                AmbientLight al = new AmbientLight();
-//                al.setColor(ColorRGBA.White.mult(1.5f));
-//                closest.getGeometry().removeLight(al);
-//                closest.getGeometry().addLight(al);
 
                 int type = 0;
                 int damage = 0;
 
                 // Get the user data from the tower selected
                 for (Spatial s = closest.getGeometry(); s != null; s = s.getParent()) {
+                    s.removeLight(al);
+                    
                     if (s.getUserData("index") != null) {
                         type = Integer.parseInt(s.getUserData("type").toString());
                         this.index = Integer.parseInt(s.getUserData("index").toString());
                         damage = s.getControl(TowerControl.class).getDamage();
-                        break;
+                        s.addLight(al);
                     }
                 }
-
+                
                 NiftyImage newImage = null;
 
                 switch (type) {

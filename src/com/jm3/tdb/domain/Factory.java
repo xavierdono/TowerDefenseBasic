@@ -9,7 +9,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
 
-public final class Factory {
+public class Factory {
 
     private int creepHealth;
     private AssetManager assetManager;

@@ -13,7 +13,7 @@ import java.nio.FloatBuffer;
 * @author Martin Simons
  * @version $Id$
  */
-public final class Circle3d
+public class Circle3d
         extends Mesh {
 
     /**
